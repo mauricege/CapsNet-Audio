@@ -19,7 +19,6 @@ class Length(layers.Layer):
     inputs: shape=[None, num_vectors, dim_vector]
     output: shape=[None, num_vectors]
     """
-
     def call(self, inputs, **kwargs):
         return K.sqrt(K.sum(K.square(inputs), -1) + K.epsilon())
 
@@ -45,7 +44,6 @@ class Mask(layers.Layer):
         out2 = Mask()([x, y])  # out2.shape=[8,6]. Masked with true labels y. Of course y can also be manipulated.
         ```
     """
-
     def call(self, inputs, **kwargs):
         if type(
                 inputs
@@ -101,7 +99,6 @@ class CapsuleLayer(layers.Layer):
     :param dim_capsule: dimension of the output vectors of the capsules in this layer
     :param routings: number of iterations for the routing algorithm
     """
-
     def __init__(self,
                  num_capsule,
                  dim_capsule,

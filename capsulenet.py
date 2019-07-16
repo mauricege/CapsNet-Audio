@@ -15,6 +15,8 @@ Result:
     About 110 seconds per epoch on a single GTX1070 GPU card
     
 Author: Xifeng Guo, E-mail: `guoxifeng1990@163.com`, Github: `https://github.com/XifengGuo/CapsNet-Keras`
+
+This is a forked version for training on audio spectrograms. 
 """
 
 import numpy as np
