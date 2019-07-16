@@ -7,9 +7,9 @@ uncommenting them and commenting their counterparts.
 Author: Xifeng Guo, E-mail: `guoxifeng1990@163.com`, Github: `https://github.com/XifengGuo/CapsNet-Keras`
 """
 
-import keras.backend as K
+import tensorflow.keras.backend as K
 import tensorflow as tf
-from keras import initializers, layers
+from tensorflow.keras import initializers, layers
 
 
 class Length(layers.Layer):
@@ -19,6 +19,7 @@ class Length(layers.Layer):
     inputs: shape=[None, num_vectors, dim_vector]
     output: shape=[None, num_vectors]
     """
+
     def call(self, inputs, **kwargs):
         return K.sqrt(K.sum(K.square(inputs), -1) + K.epsilon())
 
@@ -44,8 +45,11 @@ class Mask(layers.Layer):
         out2 = Mask()([x, y])  # out2.shape=[8,6]. Masked with true labels y. Of course y can also be manipulated.
         ```
     """
+
     def call(self, inputs, **kwargs):
-        if type(inputs) is list:  # true label is provided with shape = [None, n_classes], i.e. one-hot code.
+        if type(
+                inputs
+        ) is list:  # true label is provided with shape = [None, n_classes], i.e. one-hot code.
             assert len(inputs) == 2
             inputs, mask = inputs
         else:  # if no true label, mask by the max length of capsules. Mainly used for prediction
@@ -53,7 +57,8 @@ class Mask(layers.Layer):
             x = K.sqrt(K.sum(K.square(inputs), -1))
             # generate the mask which is a one-hot code.
             # mask.shape=[None, n_classes]=[None, num_capsule]
-            mask = K.one_hot(indices=K.argmax(x, 1), num_classes=x.get_shape().as_list()[1])
+            mask = K.one_hot(indices=K.argmax(x, 1),
+                             num_classes=x.get_shape().as_list()[1])
 
         # inputs.shape=[None, num_capsule, dim_capsule]
         # mask.shape=[None, num_capsule]
@@ -80,7 +85,8 @@ def squash(vectors, axis=-1):
     :return: a Tensor with same shape as input vectors
     """
     s_squared_norm = K.sum(K.square(vectors), axis, keepdims=True)
-    scale = s_squared_norm / (1 + s_squared_norm) / K.sqrt(s_squared_norm + K.epsilon())
+    scale = s_squared_norm / (1 + s_squared_norm) / K.sqrt(s_squared_norm +
+                                                           K.epsilon())
     return scale * vectors
 
 
@@ -95,23 +101,32 @@ class CapsuleLayer(layers.Layer):
     :param dim_capsule: dimension of the output vectors of the capsules in this layer
     :param routings: number of iterations for the routing algorithm
     """
-    def __init__(self, num_capsule, dim_capsule, routings=3,
+
+    def __init__(self,
+                 num_capsule,
+                 dim_capsule,
+                 routings=3,
                  kernel_initializer='glorot_uniform',
                  **kwargs):
         super(CapsuleLayer, self).__init__(**kwargs)
         self.num_capsule = num_capsule
         self.dim_capsule = dim_capsule
         self.routings = routings
-        self.kernel_initializer = initializers.get(kernel_initializer)
+        self.kernel_initializer = initializers.random_uniform(-1, 1)
 
     def build(self, input_shape):
-        assert len(input_shape) >= 3, "The input Tensor should have shape=[None, input_num_capsule, input_dim_capsule]"
+        assert len(
+            input_shape
+        ) >= 3, "The input Tensor should have shape=[None, input_num_capsule, input_dim_capsule]"
         self.input_num_capsule = input_shape[1]
         self.input_dim_capsule = input_shape[2]
 
         # Transform matrix
-        self.W = self.add_weight(shape=[self.num_capsule, self.input_num_capsule,
-                                        self.dim_capsule, self.input_dim_capsule],
+        self.W = self.add_weight(shape=list(
+            map(int, [
+                self.num_capsule, self.input_num_capsule, self.dim_capsule,
+                self.input_dim_capsule
+            ])),
                                  initializer=self.kernel_initializer,
                                  name='W')
 
@@ -132,12 +147,15 @@ class CapsuleLayer(layers.Layer):
         # Regard the first two dimensions as `batch` dimension,
         # then matmul: [input_dim_capsule] x [dim_capsule, input_dim_capsule]^T -> [dim_capsule].
         # inputs_hat.shape = [None, num_capsule, input_num_capsule, dim_capsule]
-        inputs_hat = K.map_fn(lambda x: K.batch_dot(x, self.W, [2, 3]), elems=inputs_tiled)
+        inputs_hat = K.map_fn(lambda x: K.batch_dot(x, self.W, [2, 3]),
+                              elems=inputs_tiled)
 
         # Begin: Routing algorithm ---------------------------------------------------------------------#
         # The prior for coupling coefficient, initialized as zeros.
         # b.shape = [None, self.num_capsule, self.input_num_capsule].
-        b = tf.zeros(shape=[K.shape(inputs_hat)[0], self.num_capsule, self.input_num_capsule])
+        b = tf.zeros(shape=[
+            K.shape(inputs_hat)[0], self.num_capsule, self.input_num_capsule
+        ])
 
         assert self.routings > 0, 'The routings should be > 0.'
         for i in range(self.routings):
@@ -149,7 +167,8 @@ class CapsuleLayer(layers.Layer):
             # The first two dimensions as `batch` dimension,
             # then matmal: [input_num_capsule] x [input_num_capsule, dim_capsule] -> [dim_capsule].
             # outputs.shape=[None, num_capsule, dim_capsule]
-            outputs = squash(K.batch_dot(c, inputs_hat, [2, 2]))  # [None, 10, 16]
+            outputs = squash(K.batch_dot(c, inputs_hat,
+                                         [2, 2]))  # [None, 10, 16]
 
             if i < self.routings - 1:
                 # outputs.shape =  [None, num_capsule, dim_capsule]
@@ -183,9 +202,14 @@ def PrimaryCap(inputs, dim_capsule, n_channels, kernel_size, strides, padding):
     :param n_channels: the number of types of capsules
     :return: output tensor, shape=[None, num_capsule, dim_capsule]
     """
-    output = layers.Conv2D(filters=dim_capsule*n_channels, kernel_size=kernel_size, strides=strides, padding=padding,
+    output = layers.Conv2D(filters=dim_capsule * n_channels,
+                           kernel_size=kernel_size,
+                           strides=strides,
+                           padding=padding,
                            name='primarycap_conv2d')(inputs)
-    outputs = layers.Reshape(target_shape=[-1, dim_capsule], name='primarycap_reshape')(output)
+    outputs = layers.Reshape(target_shape=(K.prod(output.shape[1:]) //
+                                           dim_capsule, dim_capsule),
+                             name='primarycap_reshape')(output)
     return layers.Lambda(squash, name='primarycap_squash')(outputs)
 
 
