@@ -191,7 +191,7 @@ def test(model, data, args):
 
 def load_audiodata(args):
     #1 load training data
-    x_train = normalize(np.load(args.data_train))
+    x_train = np.load(args.data_train)
 
     #x_train = (x_train - min_train) / (max_train - min_train)
     y_train = np.load(args.labels_train)
@@ -201,7 +201,7 @@ def load_audiodata(args):
                               1).astype("float32")
 
     #2 load test data
-    x_test = normalize(np.load(args.data_test))
+    x_test = np.load(args.data_test)
     #x_test = (x_test - min_train) / (max_train - min_train)
     y_test = np.load(args.labels_test)
     y_test = lb.transform(y_test)
