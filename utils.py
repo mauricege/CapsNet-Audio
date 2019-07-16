@@ -84,32 +84,29 @@ class MetricCallback(tf.keras.callbacks.Callback):
         X_val, y_val = self.validation_data[0], self.validation_data[1][0]
         y_pred = np.asarray(
             self.model.predict(X_val, batch_size=self.batch_size)[0])
+        y_val, y_pred = _transform_arrays(y_true=y_val, y_pred=y_pred)
         recall = recall_score(y_val, y_pred, average='macro')
         precision = precision_score(y_val, y_pred, average='macro')
         f1 = f1_score(y_val, y_pred, average='macro')
-
+        print('\nComputing metrics:')
         print(f'UAR: {recall}')
         self._data.append({
             'val_rec_macro': recall,
         })
-        logs['vall_rec_macro'] = recall
+        logs['val_rec_macro'] = recall
 
         print(f'Macro Precision: {precision}')
         self._data[-1]['val_prec_macro'] = precision
-        logs['vall_prec_macro'] = precision
+        logs['val_prec_macro'] = precision
 
         print(f'Macro F1: {f1}')
         self._data[-1]['val_f1_macro'] = f1
-        logs['vall_f1_macro'] = f1
+        logs['val_f1_macro'] = f1
 
-        y_val, y_pred = _transform_arrays(y_true=y_val, y_pred=y_pred)
         print(
             classification_report(y_val,
                                   y_pred,
-                                  target_names=[
-                                      self.labels[key]
-                                      for key in range(len(self.labels))
-                                  ]))
+                                  target_names=self.labels.values()))
         print(
             confusion_matrix(y_true=y_val,
                              y_pred=y_pred,

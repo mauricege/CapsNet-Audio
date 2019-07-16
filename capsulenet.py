@@ -135,13 +135,12 @@ def train(model, eval_model, data, args):
     checkpoint = callbacks.ModelCheckpoint(args.save_dir +
                                            '/weights-{epoch:02d}.h5',
                                            monitor='val_rec_macro',
+                                           mode='max',
                                            save_best_only=True,
                                            save_weights_only=True,
                                            verbose=1)
     lr_decay = callbacks.LearningRateScheduler(
         schedule=lambda epoch: args.lr * (args.lr_decay**epoch))
-
-    terminate_on_nan = callbacks.TerminateOnNaN()
 
     if os.path.isfile(args.save_dir + '/trained_model.h5'):
         model.load_weights(args.save_dir + '/trained_model.h5')
