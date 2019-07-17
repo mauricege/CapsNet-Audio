@@ -1,10 +1,12 @@
 # CapsNet Audio
-This is a fork of the [CapsNet-Keras](https://github.com/XifengGuo/CapsNet-Keras.git) repository by [XifengGuo](https://github.com/XifengGuo) that adds support for training CapsNet on audio data. It includes scripts for spectrogram extraction and oversampling.
+This is a fork of the [CapsNet-Keras](https://github.com/XifengGuo/CapsNet-Keras.git) repository by [XifengGuo](https://github.com/XifengGuo) that adds support for training CapsNet on audio data. It includes scripts for spectrogram extraction and oversampling. This code was used for the paper:
+> Shahin Amiriparian, Arsany Awad, Maurice Gerczuk, Lukas Stappen, Alice Baird, Sandra Ottl, Björn Schuller. Audio-based Recognition of Bipolar Disorder Utilising Capsule Networks. In Proceedings of IJCNN
 
 
 ## Usage
 
 **Step 1: Install requirements**
+
 For running the Tool, the following python packages are required:
 - tensorflow
 - scikit-learn
